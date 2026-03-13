@@ -3,5 +3,5 @@ User description: {description}
 Visual context: {visual_context}
 Log summary: {log_summary}
 Return JSON in this exact format:
-{{"category":"network|database|backend|frontend|deployment|permissions|external_integration|performance|unknown","hypotheses":[{{"description":"Clear hypothesis text","confidence":0.85,"evidence":["evidence1"],"category":"backend"}}]}
+{{"category":"network|database|backend|frontend|deployment|permissions|external_integration|performance|unknown","hypotheses":[{{"description":"Clear hypothesis text","confidence":0.85,"evidence":["evidence1"],"category":"backend"}}]}}
 Rules: sort hypotheses by confidence desc, max 4, confidence float 0.0-1.0, only return JSON.
