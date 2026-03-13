@@ -1,8 +1,8 @@
 //! PyO3 Python extension — exposes Rust parser to Python.
+pub mod parser;
+
 #[cfg(feature = "python")]
 use pyo3::prelude::*;
-
-mod parser;
 
 #[cfg(feature = "python")]
 #[pyfunction]
