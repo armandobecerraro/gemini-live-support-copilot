@@ -5,16 +5,19 @@ set -e
 
 PROJECT_ID="${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
 REGION="${GCP_REGION:-us-central1}"
-IMAGE_PREFIX="gcr.io/${PROJECT_ID}/supportsight"
+IMAGE_PREFIX="${REGION}-docker.pkg.dev/${PROJECT_ID}/supportsight"
+
+# Authenticate Docker to Artifact Registry
+gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
 echo "🚀 Deploying SupportSight Live to Cloud Run — project: ${PROJECT_ID}"
 
 # ── logs-service ──
 echo "Building logs-service..."
-docker build -t "${IMAGE_PREFIX}-logs-service:latest" ./logs-service
-docker push "${IMAGE_PREFIX}-logs-service:latest"
+docker build -t "${IMAGE_PREFIX}/logs-service:latest" ./logs-service
+docker push "${IMAGE_PREFIX}/logs-service:latest"
 gcloud run deploy supportsight-logs-service \
-  --image "${IMAGE_PREFIX}-logs-service:latest" \
+  --image "${IMAGE_PREFIX}/logs-service:latest" \
   --platform managed \
   --region "${REGION}" \
   --allow-unauthenticated \
@@ -29,10 +32,10 @@ echo "logs-service deployed: ${LOGS_URL}"
 
 # ── actions-service ──
 echo "Building actions-service..."
-docker build -t "${IMAGE_PREFIX}-actions-service:latest" ./actions-service
-docker push "${IMAGE_PREFIX}-actions-service:latest"
+docker build -t "${IMAGE_PREFIX}/actions-service:latest" ./actions-service
+docker push "${IMAGE_PREFIX}/actions-service:latest"
 gcloud run deploy supportsight-actions-service \
-  --image "${IMAGE_PREFIX}-actions-service:latest" \
+  --image "${IMAGE_PREFIX}/actions-service:latest" \
   --platform managed \
   --region "${REGION}" \
   --allow-unauthenticated \
@@ -45,10 +48,10 @@ ACTIONS_URL=$(gcloud run services describe supportsight-actions-service --region
 
 # ── backend-orchestrator ──
 echo "Building backend-orchestrator..."
-docker build -t "${IMAGE_PREFIX}-backend:latest" ./backend-orchestrator
-docker push "${IMAGE_PREFIX}-backend:latest"
+docker build -t "${IMAGE_PREFIX}/backend:latest" ./backend-orchestrator
+docker push "${IMAGE_PREFIX}/backend:latest"
 gcloud run deploy supportsight-backend \
-  --image "${IMAGE_PREFIX}-backend:latest" \
+  --image "${IMAGE_PREFIX}/backend:latest" \
   --platform managed \
   --region "${REGION}" \
   --allow-unauthenticated \
@@ -62,11 +65,11 @@ BACKEND_URL=$(gcloud run services describe supportsight-backend --region "${REGI
 
 # ── frontend ──
 echo "Building frontend..."
-docker build -t "${IMAGE_PREFIX}-frontend:latest" ./frontend \
+docker build -t "${IMAGE_PREFIX}/frontend:latest" ./frontend \
   --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}"
-docker push "${IMAGE_PREFIX}-frontend:latest"
+docker push "${IMAGE_PREFIX}/frontend:latest"
 gcloud run deploy supportsight-frontend \
-  --image "${IMAGE_PREFIX}-frontend:latest" \
+  --image "${IMAGE_PREFIX}/frontend:latest" \
   --platform managed \
   --region "${REGION}" \
   --allow-unauthenticated \
