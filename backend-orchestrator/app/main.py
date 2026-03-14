@@ -79,6 +79,11 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # ── Routers ──
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "backend-orchestrator", "version": settings.APP_VERSION}
+
+
 app.include_router(health.router, tags=["health"])
 app.include_router(agent.router, prefix="/agent", tags=["agent"])
 app.include_router(session.router, prefix="/session", tags=["session"])

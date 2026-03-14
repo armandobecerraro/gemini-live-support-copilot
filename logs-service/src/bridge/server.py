@@ -62,6 +62,11 @@ def _python_parse(raw: str) -> dict:
     }
 
 
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "logs-service", "rust_parser": USE_RUST}
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "rust_parser": USE_RUST}

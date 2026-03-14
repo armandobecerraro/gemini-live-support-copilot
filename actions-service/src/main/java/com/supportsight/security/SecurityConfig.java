@@ -21,7 +21,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .addFilterBefore(new ApiKeyFilter(apiKey), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actions/health", "/actuator/health").permitAll()
+                .requestMatchers("/", "/actions/health", "/actuator/health").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
