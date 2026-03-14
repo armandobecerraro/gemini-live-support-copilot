@@ -12,9 +12,9 @@ describe('Home Page', () => {
     expect(liveParts[0]).toBeInTheDocument();
   });
 
-  it('contains the start recording button', () => {
+  it('contains the primary analyze button', () => {
     render(<Page />);
-    const button = screen.getByRole('button', { name: /Start Recording/i });
+    const button = screen.getByRole('button', { name: /Analyze Incident/i });
     expect(button).toBeInTheDocument();
   });
 });
