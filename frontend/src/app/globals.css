@@ -7,10 +7,29 @@
   --primary-hover: #0C4E54;
 }
 
-* { box-sizing: border-box; }
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 
-.confidence-bar {
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
   height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #01696F, #4F98A3);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

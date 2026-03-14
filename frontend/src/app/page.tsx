@@ -6,6 +6,21 @@ import { AgentResponse, SessionStatus } from '@/types';
 import { analyzeIssue, confirmAction } from '@/services/api';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useScreenCapture } from '@/hooks/useScreenCapture';
+import { 
+  Mic, 
+  MicOff, 
+  Monitor, 
+  FileText, 
+  Play, 
+  RotateCcw, 
+  Brain, 
+  Zap, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle,
+  Loader2,
+  Trash2
+} from 'lucide-react';
 
 export default function Home() {
   const [description, setDescription] = useState('');
@@ -39,193 +54,298 @@ export default function Home() {
 
   const handleConfirm = async (actionId: string, approved: boolean) => {
     if (!response) return;
-    await confirmAction(response.session_id, actionId, approved);
-    setResponse(prev => prev ? {
-      ...prev,
-      suggested_actions: prev.suggested_actions.map(a =>
-        a.id === actionId ? { ...a, title: approved ? `✓ ${a.title}` : `✗ ${a.title}` } : a
-      )
-    } : prev);
+    try {
+      await confirmAction(response.session_id, actionId, approved);
+      setResponse(prev => prev ? {
+        ...prev,
+        suggested_actions: prev.suggested_actions.map(a =>
+          a.id === actionId ? { ...a, title: approved ? `✓ ${a.title}` : `✗ ${a.title}` } : a
+        )
+      } : prev);
+    } catch (e) {
+      console.error('Failed to confirm action', e);
+    }
+  };
+
+  const handleReset = () => {
+    setDescription('');
+    setLogs('');
+    clearTranscript();
+    clearCapture();
+    setResponse(null);
+    setStatus('idle');
+    setError(null);
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8 border-b border-gray-800 pb-6">
-        <h1 className="text-3xl font-bold text-white">SupportSight <span className="text-[#4F98A3]">Live</span></h1>
-        <p className="text-gray-400 mt-1">Multimodal incident support agent · Powered by Gemini Live API</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT: Input Panel */}
-        <div className="space-y-4">
-          {/* Voice */}
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Voice Input</h2>
-              <button
-                onClick={isRecording ? stopRecording : startRecording}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isRecording
-                    ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse'
-                    : 'bg-[#01696F] hover:bg-[#0C4E54] text-white'
-                }`}
-              >
-                {isRecording ? '⏹ Stop Recording' : '🎤 Start Recording'}
-              </button>
+    <main className="min-h-screen bg-[#050505] text-gray-100 selection:bg-cyan-500/30">
+      {/* Navbar / Header */}
+      <nav className="border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <Brain className="w-5 h-5 text-black" strokeWidth={2.5} />
             </div>
-            {transcript && (
-              <div className="bg-gray-800 rounded-lg p-3 text-sm text-gray-200">
-                <p>{transcript}</p>
-                <button onClick={clearTranscript} className="text-xs text-gray-500 mt-2 hover:text-gray-300">Clear</button>
-              </div>
-            )}
+            <h1 className="text-xl font-bold tracking-tight">SupportSight <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Live</span></h1>
           </div>
-
-          {/* Text Description */}
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-3">Incident Description</h2>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Describe the incident... e.g. 'API returning 503, high error rate in logs since 10:45am'"
-              className="w-full bg-gray-800 text-gray-100 rounded-lg p-3 text-sm resize-none border border-gray-700 focus:border-[#01696F] focus:outline-none"
-              rows={4}
-            />
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-white/40 border border-white/10 px-2 py-0.5 rounded-full bg-white/5">Production v1.0</span>
+            <button 
+              onClick={handleReset}
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/60 hover:text-white"
+              title="Reset Workspace"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
           </div>
-
-          {/* Screen Capture */}
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Screen Evidence</h2>
-              <button
-                onClick={captureScreen}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-700 hover:bg-gray-600 text-white transition-all"
-              >
-                📸 Capture Screen
-              </button>
-            </div>
-            {capturedImage && (
-              <div className="relative">
-                <img src={`data:image/png;base64,${capturedImage}`} alt="Captured screen" className="w-full rounded-lg border border-gray-700" />
-                <button onClick={clearCapture} className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded">✕</button>
-              </div>
-            )}
-          </div>
-
-          {/* Logs */}
-          <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-3">Paste Logs (optional)</h2>
-            <textarea
-              value={logs}
-              onChange={e => setLogs(e.target.value)}
-              placeholder="Paste log lines here..."
-              className="w-full bg-gray-800 text-gray-100 rounded-lg p-3 text-xs font-mono resize-none border border-gray-700 focus:border-[#01696F] focus:outline-none"
-              rows={5}
-            />
-          </div>
-
-          {/* Analyze button */}
-          <button
-            onClick={handleAnalyze}
-            disabled={status === 'loading'}
-            className="w-full py-3 rounded-xl font-semibold text-white bg-[#01696F] hover:bg-[#0C4E54] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
-          >
-            {status === 'loading' ? '🔍 Analyzing...' : '🚀 Analyze Incident'}
-          </button>
-
-          {error && <div className="bg-red-900/40 border border-red-700 rounded-lg p-3 text-red-300 text-sm">{error}</div>}
         </div>
+      </nav>
 
-        {/* RIGHT: Agent Response Panel */}
-        <div className="space-y-4">
-          {!response && status !== 'loading' && (
-            <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 text-center text-gray-500">
-              <div className="text-4xl mb-3">🤖</div>
-              <p className="text-sm">SupportSight will analyze your incident using voice, visual context, and logs.</p>
-            </div>
-          )}
-
-          {status === 'loading' && (
-            <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 text-center">
-              <div className="animate-spin text-4xl mb-3">⚙️</div>
-              <p className="text-gray-400 text-sm">Analyzing with Gemini...</p>
-            </div>
-          )}
-
-          {response && (
-            <>
-              {/* What I Understood */}
-              <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">What I Understood</h3>
-                <p className="text-gray-200 text-sm">{response.what_i_understood}</p>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* LEFT: Command Center (5 cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            <section className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-1.5 h-4 bg-cyan-500 rounded-full"></div>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-white/80">Command Center</h2>
               </div>
 
-              {/* What I See */}
-              {response.what_i_see && (
-                <div className="bg-gray-900 rounded-xl p-4 border border-[#01696F]/50">
-                  <h3 className="text-xs font-semibold text-[#4F98A3] uppercase tracking-wider mb-2">What I See</h3>
-                  <p className="text-gray-200 text-sm">{response.what_i_see}</p>
-                </div>
-              )}
-
-              {/* Hypotheses */}
-              {response.hypotheses.length > 0 && (
-                <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Hypotheses</h3>
-                  <div className="space-y-3">
-                    {response.hypotheses.map((h, i) => (
-                      <div key={i} className="bg-gray-800 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-200 text-sm">{h.description}</span>
-                          <span className="text-xs text-[#4F98A3] font-mono ml-2 shrink-0">{(h.confidence * 100).toFixed(0)}%</span>
-                        </div>
-                        <div className="confidence-bar w-full" style={{ width: `${h.confidence * 100}%`, maxWidth: '100%' }} />
-                      </div>
-                    ))}
+              <div className="space-y-6">
+                {/* Voice Input Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-white/40 flex items-center gap-1.5 uppercase tracking-tighter">
+                      <Mic className="w-3 h-3" /> Voice Analysis
+                    </label>
+                    <button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        isRecording
+                          ? 'bg-red-500/10 border-red-500/50 text-red-400 animate-pulse'
+                          : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {isRecording ? <><MicOff className="w-3 h-3" /> Stop Recording</> : <><Mic className="w-3 h-3" /> Start Analysis</>}
+                    </button>
                   </div>
+                  {transcript && (
+                    <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-sm leading-relaxed text-cyan-50/80 italic relative group">
+                      "{transcript}"
+                      <button onClick={clearTranscript} className="absolute -top-2 -right-2 w-6 h-6 bg-black border border-white/10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-400">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Next Action */}
-              {response.next_action && (
-                <div className="bg-gray-900 rounded-xl p-4 border border-yellow-600/30">
-                  <h3 className="text-xs font-semibold text-yellow-500 uppercase tracking-wider mb-2">Next Action</h3>
-                  <p className="text-gray-200 text-sm">{response.next_action}</p>
+                {/* Text Description */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-white/40 flex items-center gap-1.5 uppercase tracking-tighter">
+                    <FileText className="w-3 h-3" /> Incident Context
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Briefly describe the anomaly..."
+                    className="w-full bg-black/40 text-white rounded-xl p-4 text-sm border border-white/5 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 outline-none transition-all h-28 placeholder:text-white/10"
+                  />
                 </div>
-              )}
 
-              {/* Suggested Actions */}
-              {response.suggested_actions.length > 0 && (
-                <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Suggested Actions</h3>
+                {/* Evidence Grid */}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <label className="text-xs font-medium text-white/40 flex items-center gap-1.5 uppercase tracking-tighter">
+                      <Monitor className="w-3 h-3" /> Visuals
+                    </label>
+                    <button
+                      onClick={captureScreen}
+                      className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-dashed border-white/20 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all text-xs font-medium text-white/60 hover:text-white"
+                    >
+                      <Monitor className="w-4 h-4" /> Capture Screen
+                    </button>
+                  </div>
+                  <div className="space-y-2 text-right">
+                    <label className="text-xs font-medium text-white/40 flex items-center gap-1.5 uppercase tracking-tighter justify-end">
+                      Logs <FileText className="w-3 h-3" />
+                    </label>
+                    <button 
+                      onClick={() => setLogs(logs ? '' : '...')}
+                      className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-medium text-white/60"
+                    >
+                      {logs ? 'Logs Attached' : 'Attach Snippets'}
+                    </button>
+                  </div>
+                </div>
+
+                {capturedImage && (
+                  <div className="relative rounded-xl overflow-hidden border border-white/10 group">
+                    <img src={`data:image/png;base64,${capturedImage}`} alt="Evidence" className="w-full grayscale group-hover:grayscale-0 transition-all duration-500" />
+                    <button onClick={clearCapture} className="absolute top-2 right-2 w-8 h-8 bg-black/80 backdrop-blur border border-white/10 rounded-lg flex items-center justify-center text-white/60 hover:text-red-400 transition-colors">
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {logs && (
+                  <textarea
+                    value={logs}
+                    onChange={e => setLogs(e.target.value)}
+                    className="w-full bg-black/60 text-[10px] font-mono text-emerald-400/80 rounded-xl p-4 border border-emerald-500/10 h-32 focus:border-emerald-500/30 outline-none"
+                  />
+                )}
+
+                {/* Main Action */}
+                <button
+                  onClick={handleAnalyze}
+                  disabled={status === 'loading'}
+                  className="w-full group relative flex items-center justify-center gap-3 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 disabled:opacity-50 disabled:grayscale transition-all shadow-xl shadow-cyan-500/10 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  {status === 'loading' ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> <span className="font-bold tracking-tight">ENGINEERING ANALYSIS...</span></>
+                  ) : (
+                    <><Zap className="w-5 h-5 fill-current" /> <span className="font-bold tracking-tight uppercase">Analyze Incident</span></>
+                  )}
+                </button>
+
+                {error && (
+                  <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-xs leading-relaxed">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+
+          {/* RIGHT: Analysis Output (7 cols) */}
+          <div className="lg:col-span-7">
+            {!response && status !== 'loading' && (
+              <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-center space-y-6 bg-white/[0.02] border border-dashed border-white/10 rounded-3xl p-12">
+                <div className="relative">
+                  <div className="absolute -inset-4 bg-cyan-500/20 blur-3xl rounded-full"></div>
+                  <Brain className="w-16 h-16 text-white/20 relative z-10" strokeWidth={1} />
+                </div>
+                <div className="max-w-xs">
+                  <h3 className="text-lg font-semibold text-white/60 mb-2">Systems Standby</h3>
+                  <p className="text-sm text-white/30 leading-relaxed">Ready to process multimodal data streams. Provide context to begin incident triage.</p>
+                </div>
+              </div>
+            )}
+
+            {status === 'loading' && (
+              <div className="h-full min-h-[500px] flex flex-col items-center justify-center space-y-8 bg-white/[0.02] border border-white/5 rounded-3xl p-12 overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent animate-shimmer"></div>
+                <div className="flex gap-1 items-center">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="w-2 h-8 bg-cyan-500/40 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}></div>
+                  ))}
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-mono text-cyan-400 mb-2">GEMINI LIVE REASONING</p>
+                  <p className="text-white/40 text-xs uppercase tracking-[0.2em]">Processing high-dimensional evidence...</p>
+                </div>
+              </div>
+            )}
+
+            {response && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* Executive Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3 text-cyan-500" /> Executive Summary
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-200">{response.what_i_understood}</p>
+                  </section>
+
+                  <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <Monitor className="w-3 h-3 text-emerald-500" /> Visual Context
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-200">{response.what_i_see || "No visual evidence processed."}</p>
+                  </section>
+                </div>
+
+                {/* Hypotheses */}
+                <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                  <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-6">Probability Matrix</h3>
+                  <div className="grid gap-4">
+                    {response.hypotheses.map((h, i) => (
+                      <div key={i} className="bg-black/40 border border-white/5 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-white/80">{h.description}</span>
+                          <span className="text-xs font-mono text-cyan-400">{(h.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-1000" 
+                            style={{ width: `${h.confidence * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Suggested Actions */}
+                <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                  <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-6">Remediation Protocol</h3>
+                  <div className="space-y-4">
                     {response.suggested_actions.map((action) => (
-                      <div key={action.id} className={`rounded-lg p-3 border ${action.is_destructive ? 'border-red-700/50 bg-red-900/20' : 'border-gray-700 bg-gray-800'}`}>
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-gray-200 text-sm font-medium">{action.title}</p>
-                            <p className="text-gray-400 text-xs mt-1">{action.description}</p>
-                            {action.is_destructive && <span className="text-xs text-red-400 font-medium">⚠ Requires confirmation</span>}
+                      <div key={action.id} className={`group border rounded-2xl p-5 transition-all ${
+                        action.is_destructive 
+                          ? 'bg-red-500/[0.02] border-red-500/20 hover:border-red-500/40' 
+                          : 'bg-white/[0.02] border-white/10 hover:border-cyan-500/30'
+                      }`}>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-bold text-white">{action.title}</h4>
+                              {action.is_destructive && (
+                                <span className="text-[8px] font-bold bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20 uppercase tracking-tighter">Destructive</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-white/40 leading-relaxed max-w-md">{action.description}</p>
                           </div>
-                          <div className="flex gap-2 shrink-0">
-                            <button onClick={() => handleConfirm(action.id, true)} className="px-3 py-1 text-xs bg-[#01696F] hover:bg-[#0C4E54] text-white rounded-lg">Approve</button>
-                            <button onClick={() => handleConfirm(action.id, false)} className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded-lg">Skip</button>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleConfirm(action.id, false)}
+                              className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                            >
+                              Ignore
+                            </button>
+                            <button 
+                              onClick={() => handleConfirm(action.id, true)}
+                              className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-lg ${
+                                action.is_destructive
+                                  ? 'bg-red-600 text-white hover:bg-red-500 shadow-red-500/10'
+                                  : 'bg-white text-black hover:bg-cyan-50 shadow-white/5'
+                              }`}
+                            >
+                              Execute Protocol
+                            </button>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                </section>
 
-              {response.needs_more_info && (
-                <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-xl p-3 text-yellow-300 text-sm">
-                  ℹ️ Provide logs or a screenshot for a more accurate analysis.
-                </div>
-              )}
-            </>
-          )}
+                {response.needs_more_info && (
+                  <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-2xl p-6 flex gap-4">
+                    <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-yellow-500/80 uppercase tracking-tight">Signal Interference</h4>
+                      <p className="text-xs text-yellow-500/60 leading-relaxed">Evidence streams are currently insufficient. Supplemental logs or visual evidence recommended for higher confidence analysis.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>
