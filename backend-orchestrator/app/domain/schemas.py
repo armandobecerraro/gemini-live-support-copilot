@@ -36,6 +36,7 @@ class AgentResponse(BaseModel):
     correlation_id: str
     what_i_understood: str
     what_i_see: Optional[str] = None
+    root_cause_summary: Optional[str] = None
     recommendations: List[str]
     next_action: Optional[str] = None
     hypotheses: List[dict] = []

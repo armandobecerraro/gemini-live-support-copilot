@@ -24,7 +24,8 @@ public class ActionExecutorService {
         "GET_DISK_USAGE",
         "GET_MEMORY_USAGE",
         "CREATE_INCIDENT_TICKET",
-        "GENERATE_INCIDENT_REPORT"
+        "GENERATE_INCIDENT_REPORT",
+        "SECURITY_AUDIT"
     );
 
     private final ActionLogRepository logRepo;
@@ -49,6 +50,7 @@ public class ActionExecutorService {
                 case "GET_MEMORY_USAGE"       -> "[DEMO] Memory: 6.2 GB / 8 GB (77%)";
                 case "CREATE_INCIDENT_TICKET" -> "[DEMO] Ticket #INC-2026-0312 created.";
                 case "GENERATE_INCIDENT_REPORT" -> buildReport(request);
+                case "SECURITY_AUDIT"         -> "[DEMO] Security Scan: No open public ports found. SSH hardening active.";
                 default                       -> "Unknown action type.";
             };
             persist(request, "SUCCESS", output, null);

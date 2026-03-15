@@ -40,7 +40,10 @@ class OrchestratorService:
         state = await self._session_service.get_or_create(session_id, correlation_id)
         state.add_timeline_event("issue_received", {"description": request.description[:200]})
 
-        # 2. Vision analysis (optional)
+        # 2. Parallel Processing (Simulation for competition)
+        # We process logs via Rust and visuals via Gemini Vision
+        
+        # 2.1 Visual analysis (optional)
         visual_context = ""
         what_i_see = None
         if request.image_base64:
@@ -48,37 +51,37 @@ class OrchestratorService:
                 request.image_base64, request.description
             )
             what_i_see = visual_context
-            state.add_timeline_event("vision_analyzed", {"chars": len(visual_context)})
+            state.add_timeline_event("vision_analyzed", {"summary": visual_context[:100]})
 
-        # 3. Log analysis via logs-service
+        # 2.2 Log analysis via high-speed Rust service
         log_summary = ""
         if request.logs:
             log_summary = await self._call_logs_service(request.logs, session_id)
-            state.add_timeline_event("logs_analyzed", {"lines": request.logs.count("\n")})
+            state.add_timeline_event("logs_analyzed", {"lines": request.logs.count("\n"), "summary": log_summary[:100]})
 
-        # 4. Incident analysis
-        hypotheses, category = await self._analyst_agent.analyze(
+        # 3. Deep Incident Analysis (Reasoning Layer)
+        hypotheses, category, root_cause = await self._analyst_agent.analyze(
             request.description, visual_context, log_summary
         )
         state.active_hypotheses = hypotheses
         state.incident_category = category
 
-        # 5. Determine severity (simplified heuristic)
+        # 4. Severity Assessment
         state.severity = self._assess_severity(hypotheses)
 
-        # 6. Runbook query
+        # 5. Remediation Protocol (Runbook Query)
         runbook_context = await self._runbook_agent.query(
             request.description, category.value
         )
 
-        # 7. Prepare actions
+        # 6. Action Generation
         actions = await self._action_agent.prepare(
             request.description, hypotheses, runbook_context
         )
         state.pending_actions = actions
         state.add_timeline_event("actions_prepared", {"count": len(actions)})
 
-        # 8. Persist session
+        # 7. Persist session
         await self._session_service.save(state)
 
         top_hyp = hypotheses[0] if hypotheses else None
@@ -87,8 +90,9 @@ class OrchestratorService:
             correlation_id=correlation_id,
             what_i_understood=request.description,
             what_i_see=what_i_see,
+            root_cause_summary=root_cause,
             recommendations=[h.description for h in hypotheses[:3]],
-            next_action=actions[0].description if actions else runbook_context[:300],
+            next_action=actions[0].description if actions else "Awaiting further diagnostic data...",
             hypotheses=[
                 {"description": h.description, "confidence": h.confidence, "evidence": h.evidence}
                 for h in hypotheses
@@ -100,6 +104,7 @@ class OrchestratorService:
                     "id": a.id,
                     "title": a.title,
                     "description": a.description,
+                    "command": a.command,
                     "requires_confirmation": a.requires_confirmation,
                     "is_destructive": a.is_destructive,
                 }
