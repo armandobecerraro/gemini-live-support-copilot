@@ -9,15 +9,18 @@ describe('Frontend Integration', () => {
   it('submits an incident and displays the response', async () => {
     const mockResponse = {
       session_id: 'test-session',
+      correlation_id: 'test-correlation',
       what_i_understood: 'I understood there is a 500 error.',
       what_i_see: 'I see a screen with errors.',
+      recommendations: ['Check DB', 'Scale connections'],
       hypotheses: [
-        { description: 'Database is down', confidence: 0.9 }
+        { description: 'Database is down', confidence: 0.9, evidence: ['Log 500 error'] }
       ],
       suggested_actions: [
-        { id: '1', title: 'Restart Database', description: 'Restarts the pg service', is_destructive: true }
+        { id: '1', title: 'Restart Database', description: 'Restarts the pg service', requires_confirmation: true, is_destructive: true }
       ],
       root_cause_summary: 'Database connection failure',
+      confidence: 0.9,
       needs_more_info: false
     };
 
