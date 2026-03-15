@@ -18,7 +18,10 @@ describe('Frontend Integration', () => {
         { id: '1', title: 'Restart Database', description: 'Restarts the pg service', is_destructive: true }
       ],
       root_cause_summary: 'Database connection failure',
-      needs_more_info: false
+      needs_more_info: false,
+      correlation_id: 'test-correlation-id',
+      recommendations: ['Check database connection pool'],
+      confidence: 0.9
     };
 
     mockedApi.analyzeIssue.mockResolvedValueOnce(mockResponse);
