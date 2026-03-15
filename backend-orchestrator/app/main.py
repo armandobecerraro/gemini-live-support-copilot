@@ -51,6 +51,7 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
 @app.middleware("http")
 async def correlation_id_middleware(request: Request, call_next):
+    logger.info({"event": "request_start", "method": request.method, "path": request.url.path})
     correlation_id = request.headers.get(settings.CORRELATION_ID_HEADER, str(uuid.uuid4()))
     request.state.correlation_id = correlation_id
     response: Response = await call_next(request)

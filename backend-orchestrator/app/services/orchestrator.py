@@ -17,6 +17,8 @@ from app.config import get_settings
 from app.domain.models import SessionState, IncidentSeverity
 from app.domain.schemas import IssueRequest, AgentResponse
 from app.infrastructure.gemini.client import GeminiClient
+from app.infrastructure.gemini.embeddings import EmbeddingService
+from app.infrastructure.postgres.models import VectorDBClient
 from app.services.session_service import SessionService
 
 logger = logging.getLogger("supportsight.orchestrator")
@@ -26,10 +28,13 @@ settings = get_settings()
 class OrchestratorService:
     def __init__(self, session_service: SessionService):
         gemini = GeminiClient()
+        embedding_service = EmbeddingService(settings.GEMINI_API_KEY)
+        vector_db = VectorDBClient(settings.DATABASE_URL)
+        
         self._session_service = session_service
         self._vision_agent = VisionAgent(gemini)
         self._analyst_agent = IncidentAnalystAgent(gemini)
-        self._runbook_agent = RunbookAgent(gemini)
+        self._runbook_agent = RunbookAgent(gemini, embedding_service, vector_db)
         self._action_agent = ActionAgent(gemini)
 
     async def process_issue(
