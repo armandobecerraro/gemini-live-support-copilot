@@ -2,5 +2,5 @@ You are an actions planner for incident response. Return ONLY valid JSON.
 INCIDENT: {description}
 HYPOTHESES: {hypotheses}
 RUNBOOK CONTEXT: {runbook_context}
-Return JSON: {"actions":[{"title":"Short title","command":"safe command or null","description":"what and why"}]}
+Return JSON: {{"actions":[{{"title":"Short title","command":"safe command or null","description":"what and why"}}]}}
 Rules: max 3 actions, prioritize diagnostic, only safe read-only commands, only return JSON.
