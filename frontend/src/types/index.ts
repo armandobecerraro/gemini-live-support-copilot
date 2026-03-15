@@ -24,6 +24,7 @@ export interface AgentResponse {
   correlation_id: string;
   what_i_understood: string;
   what_i_see?: string;
+  root_cause_summary?: string;
   recommendations: string[];
   next_action?: string;
   hypotheses: Hypothesis[];

@@ -19,8 +19,8 @@ class IncidentAnalystAgent:
         description: str,
         visual_context: str,
         log_summary: str,
-    ) -> tuple[list[Hypothesis], IncidentCategory]:
-        """Return prioritized hypotheses and incident category."""
+    ) -> tuple[list[Hypothesis], IncidentCategory, str]:
+        """Return prioritized hypotheses, incident category, and root cause summary."""
         prompt = load_prompt("incident_analysis").format(
             description=description,
             visual_context=visual_context or "No visual context provided.",
@@ -39,8 +39,10 @@ class IncidentAnalystAgent:
                 for h in parsed.get("hypotheses", [])
             ]
             category = IncidentCategory(parsed.get("category", "unknown"))
+            root_cause = parsed.get("root_cause_summary", "Unknown root cause.")
         except Exception as exc:
             logger.warning({"event": "analyst_parse_error", "error": str(exc), "raw": raw[:200]})
-            hypotheses = [Hypothesis(description=raw, confidence=0.5)]
+            hypotheses = [Hypothesis(description="Parsing error in analysis.", confidence=0.0)]
             category = IncidentCategory.UNKNOWN
-        return hypotheses, category
+            root_cause = "Analysis failed due to format error."
+        return hypotheses, category, root_cause

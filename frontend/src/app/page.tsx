@@ -252,8 +252,28 @@ export default function Home() {
 
             {response && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* Root Cause Banner (Competitive Addition) */}
+                {response.root_cause_summary && (
+                  <div className="bg-gradient-to-r from-red-500/10 to-transparent border-l-4 border-red-500 rounded-r-2xl p-6 shadow-lg shadow-red-500/5">
+                    <h3 className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                      <Zap className="w-3 h-3 fill-current" /> Primary Root Cause Identified
+                    </h3>
+                    <p className="text-lg font-semibold text-white leading-tight">
+                      {response.root_cause_summary}
+                    </p>
+                  </div>
+                )}
+
                 {/* Executive Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {response.root_cause_summary && (
+                    <section className="md:col-span-2 bg-gradient-to-r from-cyan-900/40 to-emerald-900/40 border border-cyan-500/30 rounded-2xl p-6 shadow-lg shadow-cyan-500/5">
+                      <h3 className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <Zap className="w-3 h-3" /> Potential Root Cause Identified
+                      </h3>
+                      <p className="text-lg font-medium leading-tight text-white">{response.root_cause_summary}</p>
+                    </section>
+                  )}
                   <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
                     <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
                       <CheckCircle2 className="w-3 h-3 text-cyan-500" /> Executive Summary

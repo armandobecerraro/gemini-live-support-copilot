@@ -16,7 +16,7 @@ fn warn_re() -> &'static Regex {
 }
 fn ts_re() -> &'static Regex {
     TS_RE.get_or_init(|| {
-        Regex::new(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}").unwrap()
+        Regex::new(r"(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})|(\d{2}:\d{2}:\d{2}.\d{3})").unwrap()
     })
 }
 
