@@ -4,8 +4,20 @@ Hexagonal pattern: this is the use-case layer.
 """
 import logging
 import uuid
+import os
 from datetime import datetime
 from typing import Optional
+
+# Google Cloud Integrations (Compliance with Hackathon Rule #6)
+try:
+    from google.cloud import logging as cloud_logging
+    client = cloud_logging.Client()
+    client.setup_logging()
+    logger = logging.getLogger("supportsight.orchestrator")
+    logger.info("Cloud Logging enabled for Gemini Challenge compliance")
+except Exception:
+    logger = logging.getLogger("supportsight.orchestrator")
+    logger.info("Local logging active (Cloud Logging skipped)")
 
 import httpx
 

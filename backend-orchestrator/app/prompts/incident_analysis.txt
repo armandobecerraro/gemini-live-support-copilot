@@ -14,7 +14,9 @@ Perform a deep technical analysis of the incident. Correlate visual anomalies (U
 - **Root Cause Isolation:** Is it a code bug, a resource exhaustion (OOM), or a network partition?
 
 ### OUTPUT FORMAT
-You MUST return ONLY valid JSON in the following format. No extra text, no markdown code blocks outside the JSON.
+You MUST return ONLY valid JSON in the following format. 
+IMPORTANT: All text values MUST BE IN ENGLISH to comply with international judging rules.
+No extra text, no markdown code blocks outside the JSON.
 
 {{
   "category": "network|database|backend|frontend|deployment|permissions|external_integration|performance|unknown",
