@@ -59,9 +59,21 @@ gcloud run deploy supportsight-backend \
   --memory 1Gi \
   --cpu 2 \
   --set-secrets "GEMINI_API_KEY=gemini-api-key:latest" \
-  --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production"
+  --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production,DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL}"
 
 BACKEND_URL=$(gcloud run services describe supportsight-backend --region "${REGION}" --format 'value(status.url)')
+
+# ── knowledge-ingestion ──
+echo "Ingesting runbooks into production database..."
+gcloud run jobs deploy supportsight-ingest \
+  --image "${IMAGE_PREFIX}/backend:latest" \
+  --region "${REGION}" \
+  --set-secrets "GEMINI_API_KEY=gemini-api-key:latest" \
+  --set-env-vars "DATABASE_URL=${DATABASE_URL},PYTHONPATH=." \
+  --command "python3" \
+  --args "scripts/ingest_runbooks.py"
+
+gcloud run jobs execute supportsight-ingest --region "${REGION}" --wait
 
 # ── frontend ──
 echo "Building frontend..."

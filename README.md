@@ -78,19 +78,15 @@ Full architecture: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHI
 
 ## Features
 
-- **Voice input** — speak to the agent, hands-free diagnosis
-- **Screen capture** — share a screenshot, agent explains what it sees
+- **Voice input** — speak to the agent, hands-free diagnosis (uses Web Speech API)
+- **Screen capture** — share a real-time screenshot of your terminal or IDE
 - **Log analysis** — paste logs, **Rust parser (SIMD optimized)** identifies root cause in <10ms
 - **Anomaly detection** — identifies structural outliers and log corruption in real-time
-- **Multimodal reasoning** — Gemini combines voice + vision + text + logs
-- **Hypothesis engine** — ranked hypotheses with confidence scores
-- **Action panel** — `What I Understood`, `What I See`, `Recommendations`, `Next Action`
-- **Enterprise Safeguards** — **Dry-run mode** for dangerous commands and **Allow-list** for secure execution
-- **Human confirmation gate** — no action executes without your approval
-- **Session timeline** — full auditable trail of every step
-- **Incident report** — auto-generated Markdown/JSON for handoff
-- **Professional RAG** — grounded answers using **pgvector** semantic search over your runbooks
-- **Bilingual** — conversation in Spanish, artifacts in English
+- **Multimodal reasoning** — Gemini combines voice + vision + text + logs for high-confidence triage
+- **Hypothesis engine** — ranked hypotheses with evidence and probability scores
+- **Professional RAG** — grounded answers using **pgvector** semantic search over project runbooks
+- **Human-in-the-loop** — strict safety gate: no diagnostic or remediation action executes without human approval
+- **Session timeline** — auditable trail of every event, observation, and decision
 
 ---
 

@@ -19,7 +19,10 @@ import {
   XCircle, 
   AlertTriangle,
   Loader2,
-  Trash2
+  Trash2,
+  BookOpen,
+  HelpCircle,
+  Code2
 } from 'lucide-react';
 
 export default function Home() {
@@ -29,6 +32,7 @@ export default function Home() {
   const [status, setStatus] = useState<SessionStatus>('idle');
   const [response, setResponse] = useState<AgentResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showDocs, setShowDocs] = useState(false);
   const { isRecording, transcript, startRecording, stopRecording, clearTranscript } = useAudioRecorder();
   const { capturedImage, captureScreen, clearCapture } = useScreenCapture();
 
@@ -77,8 +81,97 @@ export default function Home() {
     setError(null);
   };
 
+  const loadExample = (type: 'db' | 'auth') => {
+    if (type === 'db') {
+      setDescription('Database connection failure in production');
+      setLogs('2026-03-16 14:20:01 ERROR Connection timeout after 30s\n2026-03-16 14:20:05 FATAL pgvector.asyncpg.PoolError: database is unresponsive');
+    } else {
+      setDescription('Authentication service is returning 401 for all users');
+      setLogs('2026-03-16 10:00:00 ERROR [auth-service] JWT secret key mismatch\n2026-03-16 10:00:05 WARN [auth-service] Token validation failed: signature invalid');
+    }
+    setShowDocs(false);
+  };
+
   return (
     <main className="min-h-screen bg-[#050505] text-gray-100 selection:bg-cyan-500/30">
+      {/* Documentation Overlay */}
+      {showDocs && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-8 shadow-2xl relative text-left">
+            <button 
+              onClick={() => setShowDocs(false)}
+              className="absolute top-6 right-6 p-2 hover:bg-white/5 rounded-full transition-colors"
+            >
+              <XCircle className="w-6 h-6 text-white/40 hover:text-white" />
+            </button>
+            
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-cyan-400" />
+              </div>
+              <h2 className="text-2xl font-bold">Guía de Inicio Rápido</h2>
+            </div>
+
+            <div className="space-y-8">
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-emerald-400" /> ¿Cómo funciona?
+                </h3>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  SupportSight Live es un agente autónomo multimodal diseñado para ingenieros de SRE y DevOps. Analiza incidentes usando tres flujos de datos simultáneos:
+                </p>
+                <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <li className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+                    <Mic className="w-5 h-5 mx-auto mb-2 text-cyan-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-tighter">Voz en Tiempo Real</span>
+                  </li>
+                  <li className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+                    <Monitor className="w-5 h-5 mx-auto mb-2 text-emerald-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-tighter">Visión de Pantalla</span>
+                  </li>
+                  <li className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+                    <FileText className="w-5 h-5 mx-auto mb-2 text-purple-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-tighter">Análisis de Logs (Rust)</span>
+                  </li>
+                </ul>
+              </section>
+
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                  <Play className="w-4 h-4 text-cyan-400" /> Probar con ejemplos
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => loadExample('db')}
+                    className="flex flex-col gap-2 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl hover:bg-cyan-500/10 transition-all text-left group"
+                  >
+                    <span className="text-xs font-bold text-cyan-400 group-hover:underline">Escenario A: Caída de DB</span>
+                    <span className="text-[10px] text-gray-500">Simula un error de timeout y pgvector pool exhaustion.</span>
+                  </button>
+                  <button 
+                    onClick={() => loadExample('auth')}
+                    className="flex flex-col gap-2 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl hover:bg-emerald-500/10 transition-all text-left group"
+                  >
+                    <span className="text-xs font-bold text-emerald-400 group-hover:underline">Escenario B: Fallo de Auth</span>
+                    <span className="text-[10px] text-gray-500">Simula errores de JWT y validación de firmas.</span>
+                  </button>
+                </div>
+              </section>
+
+              <section className="space-y-3 p-6 bg-gradient-to-br from-cyan-500/10 to-transparent border border-cyan-500/20 rounded-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-white">Razonamiento Gemini</h3>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  El agente utiliza **RAG (Retrieval-Augmented Generation)** con una base de datos vectorial en **Postgres** poblada con los runbooks oficiales del proyecto para proporcionar soluciones precisas y seguras.
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navbar / Header */}
       <nav className="border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -89,6 +182,12 @@ export default function Home() {
             <h1 className="text-xl font-bold tracking-tight">SupportSight <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Live</span></h1>
           </div>
           <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setShowDocs(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-[10px] font-bold uppercase tracking-widest text-cyan-400"
+            >
+              <HelpCircle className="w-3.5 h-3.5" /> Guide
+            </button>
             <span className="text-[10px] font-medium uppercase tracking-widest text-white/40 border border-white/10 px-2 py-0.5 rounded-full bg-white/5">Production v1.0</span>
             <button 
               onClick={handleReset}
