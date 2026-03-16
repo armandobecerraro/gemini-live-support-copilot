@@ -6,18 +6,25 @@ import '../widgets/response_panel.dart';
 import '../widgets/input_panel.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final ApiService? api;
+  const HomeScreen({super.key, this.api});
   @override State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _api = ApiService();
+  late final ApiService _api;
   final _descController = TextEditingController();
   final _logsController = TextEditingController();
   AgentResponse? _response;
   bool _loading = false;
   String? _error;
   String? _sessionId;
+
+  @override
+  void initState() {
+    super.initState();
+    _api = widget.api ?? ApiService();
+  }
 
   Future<void> _analyze() async {
     if (_descController.text.trim().isEmpty) return;
@@ -40,8 +47,13 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFF0D1117),
       appBar: AppBar(
         backgroundColor: const Color(0xFF161B22),
-        title: const Text('SupportSight Live', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        subtitle: const Text('Multimodal Incident Agent · Gemini', style: TextStyle(color: Color(0xFF4F98A3), fontSize: 12)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('SupportSight Live', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            const Text('Multimodal Incident Agent · Gemini', style: TextStyle(color: Color(0xFF4F98A3), fontSize: 12)),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

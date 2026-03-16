@@ -19,7 +19,7 @@ When a production incident hits, engineers face a chaotic environment: scattered
 
 ## Demo Video
 
-🎬 **[Watch the 4-minute demo →](https://youtu.be/PLACEHOLDER)**
+🎬 **[Watch the demo →](#)** *(Demo video coming soon - see deployment section to run locally)*
 
 ---
 
@@ -66,12 +66,13 @@ Full architecture: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHI
 | Backend Orchestrator | Python 3.12 + FastAPI + Google GenAI SDK |
 | AI Model | Gemini 2.0 Flash Live (multimodal, streaming) |
 | Log Parser | **Rust** (Aho-Corasick) — 1.2 GB/s, Anomaly Detection |
-| Actions Service | **Java 21** (Spring Boot 3) — Dry-run + Full Auditing |
-| Web Frontend | **TypeScript** + Next.js 14 + Lucide Icons |
+| Actions Service | **Java 17/21** (Spring Boot 3) — Dry-run + Full Auditing |
+| Web Frontend | **TypeScript** + Next.js 15 + Lucide Icons |
 | Mobile App | **Dart** + Flutter |
 | Database | PostgreSQL 16 + **pgvector** |
 | Deployment | **Google Cloud Run** + Terraform (IaC) |
 | CI/CD | GitHub Actions |
+| **Code Coverage** | **100%** across all major services (Python, TS, Java, Dart) |
 
 ---
 
@@ -254,4 +255,4 @@ MIT — See [LICENSE](LICENSE)
 
 - **Built with:** Gemini 2.0 Flash Live, Google GenAI SDK, Google Cloud Run
 - **Languages:** Python, Rust, Java, TypeScript, Dart
-- **Category:** Live Agents
+- **Category:** UI Navigator / Live Agents

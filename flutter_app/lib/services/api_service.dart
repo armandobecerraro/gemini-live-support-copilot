@@ -5,10 +5,12 @@ import '../models/agent_response.dart';
 
 class ApiService {
   final String baseUrl;
-  ApiService({this.baseUrl = 'http://localhost:8080'});
+  final http.Client client;
+  ApiService({this.baseUrl = 'http://localhost:8080', http.Client? client}) 
+    : client = client ?? http.Client();
 
   Future<AgentResponse> analyzeIssue(IssueRequest request) async {
-    final response = await http.post(
+    final response = await this.client.post(
       Uri.parse('$baseUrl/agent/issue'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(request.toJson()),
@@ -21,7 +23,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> confirmAction(String sessionId, String actionId, bool approved) async {
-    final response = await http.post(
+    final response = await this.client.post(
       Uri.parse('$baseUrl/agent/confirm-action'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'session_id': sessionId, 'action_id': actionId, 'approved': approved}),

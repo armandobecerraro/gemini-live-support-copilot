@@ -12,6 +12,7 @@ const customJestConfig = {
   },
   modulePathIgnorePatterns: ['<rootDir>/.next/'],
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  coverageProvider: 'v8',
 };
 
 module.exports = createJestConfig(customJestConfig);
