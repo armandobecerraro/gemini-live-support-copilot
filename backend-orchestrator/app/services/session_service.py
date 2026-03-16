@@ -17,8 +17,22 @@ settings = get_settings()
 
 class SessionService:
     def __init__(self, redis_url: str = settings.REDIS_URL):
-        self._redis = redis.from_url(redis_url, decode_responses=True)
+        # Fallback to in-memory if redis_url is not a valid redis URL or is missing
+        self._redis = None
+        self._use_redis = False
+        
+        if redis_url and any(scheme in redis_url for scheme in ["redis://", "rediss://", "unix://"]):
+            try:
+                self._redis = redis.from_url(redis_url, decode_responses=True)
+                self._use_redis = True
+                logger.info(f"SessionService using Redis at {redis_url.split('@')[-1]}")
+            except Exception as e:
+                logger.error(f"Failed to connect to Redis: {e}. Falling back to in-memory.")
+        else:
+            logger.warning(f"Invalid or missing REDIS_URL. Falling back to in-memory store.")
+            
         self._ttl = settings.SESSION_TTL_SECONDS
+        self._memory_store = {} # Fallback store
 
     async def get_or_create(self, session_id: str, correlation_id: str) -> SessionState:
         state = await self.get(session_id)
@@ -27,19 +41,32 @@ class SessionService:
         return SessionState(session_id=session_id, correlation_id=correlation_id)
 
     async def save(self, state: SessionState):
-        try:
-            data = self._serialize(state)
-            await self._redis.setex(
-                f"session:{state.session_id}",
-                self._ttl,
-                json.dumps(data)
-            )
-        except Exception as e:
-            logger.error(f"Error saving session to Redis: {e}")
+        if self._use_redis:
+            try:
+                data = self._serialize(state)
+                await self._redis.setex(
+                    f"session:{state.session_id}",
+                    self._ttl,
+                    json.dumps(data)
+                )
+                return
+            except Exception as e:
+                logger.error(f"Error saving session to Redis: {e}")
+        
+        # Fallback to memory
+        self._memory_store[f"session:{state.session_id}"] = state
 
     async def get(self, session_id: str) -> Optional[SessionState]:
-        try:
-            raw = await self._redis.get(f"session:{session_id}")
+        if self._use_redis:
+            try:
+                raw = await self._redis.get(f"session:{session_id}")
+                if not raw:
+                    return None
+                return self._deserialize(json.loads(raw))
+            except Exception as e:
+                logger.error(f"Error retrieving session from Redis: {e}")
+        
+        return self._memory_store.get(f"session:{session_id}")
             if not raw:
                 return None
             return self._deserialize(json.loads(raw))

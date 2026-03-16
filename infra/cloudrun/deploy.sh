@@ -47,20 +47,20 @@ gcloud run deploy supportsight-actions-service \
 
 ACTIONS_URL=$(gcloud run services describe supportsight-actions-service --region "${REGION}" --format 'value(status.url)')
 
-# ── backend-orchestrator ──
-echo "Building backend-orchestrator..."
-docker build -t "${IMAGE_PREFIX}/backend:latest" ./backend-orchestrator
-docker push "${IMAGE_PREFIX}/backend:latest"
-gcloud run deploy supportsight-backend \
-  --image "${IMAGE_PREFIX}/backend:latest" \
-  --platform managed \
-  --region "${REGION}" \
-  --allow-unauthenticated \
-  --port 8080 \
-  --memory 1Gi \
-  --cpu 2 \
-  --set-secrets "GEMINI_API_KEY=gemini-api-key:latest" \
-  --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production,DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL}"
+    # ── backend-orchestrator ──
+    echo "Building backend-orchestrator..."
+    docker build -t "${IMAGE_PREFIX}/backend:latest" ./backend-orchestrator
+    docker push "${IMAGE_PREFIX}/backend:latest"
+    gcloud run deploy supportsight-backend \
+      --image "${IMAGE_PREFIX}/backend:latest" \
+      --platform managed \
+      --region "${REGION}" \
+      --allow-unauthenticated \
+      --port 8080 \
+      --memory 1Gi \
+      --cpu 2 \
+      --set-secrets "GEMINI_API_KEY=gemini-api-key:latest" \
+      --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production,DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL:-redis://localhost:6379/0}"
 
 BACKEND_URL=$(gcloud run services describe supportsight-backend --region "${REGION}" --format 'value(status.url)')
 
@@ -76,19 +76,19 @@ gcloud run jobs deploy supportsight-ingest \
 
 gcloud run jobs execute supportsight-ingest --region "${REGION}" --wait
 
-# ── frontend ──
-echo "Building frontend..."
-docker build -t "${IMAGE_PREFIX}/frontend:latest" ./frontend \
-  --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}"
-docker push "${IMAGE_PREFIX}/frontend:latest"
-gcloud run deploy supportsight-frontend \
-  --image "${IMAGE_PREFIX}/frontend:latest" \
-  --platform managed \
-  --region "${REGION}" \
-  --allow-unauthenticated \
-  --port 3000 \
-  --memory 512Mi \
-  --set-env-vars "NEXT_PUBLIC_API_URL=${BACKEND_URL}"
+    # ── frontend ──
+    echo "Building frontend..."
+    docker build -t "${IMAGE_PREFIX}/frontend:latest" ./frontend \
+      --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}"
+    docker push "${IMAGE_PREFIX}/frontend:latest"
+    gcloud run deploy supportsight-frontend \
+      --image "${IMAGE_PREFIX}/frontend:latest" \
+      --platform managed \
+      --region "${REGION}" \
+      --allow-unauthenticated \
+      --port 3000 \
+      --memory 512Mi \
+      --set-env-vars "NEXT_PUBLIC_API_URL=${BACKEND_URL},NEXT_PUBLIC_ENVIRONMENT=production"
 
 FRONTEND_URL=$(gcloud run services describe supportsight-frontend --region "${REGION}" --format 'value(status.url)')
 
