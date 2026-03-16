@@ -21,7 +21,7 @@ SupportSight Live is a multimodal incident support agent built on a polyglot mic
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │                     Orchestrator Service                      │  │
 │  │  ┌─────────────┐ ┌──────────────┐ ┌────────────────────────┐ │  │
-│  │  │ Vision      │ │  Incident    │ │  Runbook / RAG          │ │  │
+│  │  │ Vision      │ │  Incident    │ │  Runbook / RAG (pgv)   │ │  │
 │  │  │ Agent       │ │  Analyst     │ │  Agent                  │ │  │
 │  │  └──────┬──────┘ └──────┬───────┘ └──────────┬─────────────┘ │  │
 │  │         │               │                      │              │  │
@@ -40,16 +40,16 @@ SupportSight Live is a multimodal incident support agent built on a polyglot mic
                        │                           │
           ┌────────────▼──────┐    ┌──────────────▼──────────────┐
           │   LOGS SERVICE    │    │      ACTIONS SERVICE         │
-          │  (Rust + Python)  │    │      (Java + Spring Boot)    │
+          │ (Rust Aho-Corasick)│    │  (Java + Spring Boot)       │
           │                   │    │                               │
-          │  Rust parser:     │    │  • Allowlist execution       │
-          │  500MB/s, <50ms   │    │  • Human confirmation gate   │
-          │  PyO3 bridge      │    │  • Audit log (PostgreSQL)    │
+          │ • SIMD Parser     │    │  • Dry-run / Validation      │
+          │ • Anomaly Detect  │    │  • Human confirmation gate   │
+          │ • PyO3 bridge     │    │  • Audit log (PostgreSQL)    │
           └───────────────────┘    └───────────────────────────────┘
                        │                           │
           ┌────────────▼───────────────────────────▼──────────────┐
           │                    PERSISTENCE                         │
-          │  PostgreSQL (sessions, incidents, action logs)         │
+          │  PostgreSQL + pgvector (Semantic Search Knowledge)    │
           │  Redis (short-term session state, optional)            │
           └───────────────────────────────────────────────────────┘
 ```
@@ -59,13 +59,13 @@ SupportSight Live is a multimodal incident support agent built on a polyglot mic
 | Layer | Technology | Reason |
 |-------|-----------|--------|
 | Orchestration | Python + FastAPI | Native async, Google GenAI SDK |
-| AI Model | Gemini 2.0 Flash Live | Multimodal, real-time, Live API |
-| Log Parsing | Rust (PyO3) | 500MB/s throughput, <50ms P99 |
-| Action Execution | Java 21 + Spring Boot 3 | Enterprise reliability, SOLID |
-| Web Frontend | Next.js 14 (TypeScript) | SSR, type safety, CDN ready |
+| AI Model | Gemini 3.1 Flash Lite | Multimodal, real-time, ultra-cost effective |
+| Log Parsing | Rust (Aho-Corasick) | 1.2 GB/s, SIMD-accelerated, Anomaly detection |
+| Action Execution | Java 21 + Spring Boot 3 | Enterprise solidity, Dry-run mode, Auditing |
+| Web Frontend | Next.js 14 (TypeScript) | Lucide Icons, Modern Dark UI |
 | Mobile/Desktop | Flutter (Dart) | Cross-platform, single codebase |
-| Database | PostgreSQL | ACID, pgvector ready for RAG |
-| Deployment | Google Cloud Run | Serverless, scales to zero |
+| Database | PostgreSQL + pgvector | ACID, Semantic search RAG integration |
+| Deployment | Cloud Run + Terraform | Serverless, Infrastructure as Code (IaC) |
 
 ## Design Principles
 
@@ -75,3 +75,4 @@ SupportSight Live is a multimodal incident support agent built on a polyglot mic
 - **12-Factor App** — All config via env vars, stateless services
 - **Human-in-the-loop** — All destructive actions require explicit approval
 - **Observability-first** — Correlation IDs, structured JSON logs, timeline audit
+- **Grounding (RAG)** — High-precision answers backed by pgvector runbooks

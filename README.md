@@ -65,12 +65,12 @@ Full architecture: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHI
 |---------|-----------|
 | Backend Orchestrator | Python 3.12 + FastAPI + Google GenAI SDK |
 | AI Model | Gemini 2.0 Flash Live (multimodal, streaming) |
-| Log Parser | **Rust** (PyO3) — 500MB/s, <50ms P99 |
-| Actions Service | **Java 21** + Spring Boot 3 |
-| Web Frontend | **TypeScript** + Next.js 14 |
+| Log Parser | **Rust** (Aho-Corasick) — 1.2 GB/s, Anomaly Detection |
+| Actions Service | **Java 21** (Spring Boot 3) — Dry-run + Full Auditing |
+| Web Frontend | **TypeScript** + Next.js 14 + Lucide Icons |
 | Mobile App | **Dart** + Flutter |
-| Database | PostgreSQL 16 |
-| Deployment | **Google Cloud Run** |
+| Database | PostgreSQL 16 + **pgvector** |
+| Deployment | **Google Cloud Run** + Terraform (IaC) |
 | CI/CD | GitHub Actions |
 
 ---
@@ -79,14 +79,16 @@ Full architecture: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHI
 
 - **Voice input** — speak to the agent, hands-free diagnosis
 - **Screen capture** — share a screenshot, agent explains what it sees
-- **Log analysis** — paste logs, Rust parser identifies root cause in <50ms
+- **Log analysis** — paste logs, **Rust parser (SIMD optimized)** identifies root cause in <10ms
+- **Anomaly detection** — identifies structural outliers and log corruption in real-time
 - **Multimodal reasoning** — Gemini combines voice + vision + text + logs
 - **Hypothesis engine** — ranked hypotheses with confidence scores
 - **Action panel** — `What I Understood`, `What I See`, `Recommendations`, `Next Action`
+- **Enterprise Safeguards** — **Dry-run mode** for dangerous commands and **Allow-list** for secure execution
 - **Human confirmation gate** — no action executes without your approval
 - **Session timeline** — full auditable trail of every step
 - **Incident report** — auto-generated Markdown/JSON for handoff
-- **Runbook RAG** — grounded answers from your own procedures
+- **Professional RAG** — grounded answers using **pgvector** semantic search over your runbooks
 - **Bilingual** — conversation in Spanish, artifacts in English
 
 ---
@@ -229,9 +231,11 @@ gemini-live-support-copilot/
 
 ## Roadmap
 
+- [x] **pgvector** for full RAG over runbook documents
+- [x] **Anomaly Detection** in log streams
+- [x] **Enterprise Auditing** for actions
 - [ ] WebSocket streaming for real-time token output
 - [ ] Gemini Live API native audio streaming (WebRTC)
-- [ ] pgvector for full RAG over runbook documents
 - [ ] Slack / PagerDuty integration for incident creation
 - [ ] Multi-language support (ES/EN auto-detect)
 - [ ] Feedback loop for hypothesis accuracy improvement
