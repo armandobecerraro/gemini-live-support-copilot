@@ -67,12 +67,6 @@ class SessionService:
                 logger.error(f"Error retrieving session from Redis: {e}")
         
         return self._memory_store.get(f"session:{session_id}")
-            if not raw:
-                return None
-            return self._deserialize(json.loads(raw))
-        except Exception as e:
-            logger.error(f"Error retrieving session from Redis: {e}")
-            return None
 
     def _serialize(self, state: SessionState) -> dict:
         data = asdict(state)
