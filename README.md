@@ -4,7 +4,7 @@
 
 > Gemini Live Agent Challenge — Google 2026
 
-[![CI](https://github.com/armandobecerrarodriguez/gemini-live-support-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/armandobecerrarodriguez/gemini-live-support-copilot/actions)
+[![CI](https://github.com/armandobecerraro/supportsight-live-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/armandobecerraro/supportsight-live-agent/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -13,7 +13,7 @@
 
 When a production incident hits, engineers face a chaotic environment: scattered logs, error screenshots, noise in Slack, and no time to think. Diagnosis is slow, human, and exhausting.
 
-**SupportSight Live** acts as a real-time intelligent copilot: it **listens to the engineer's voice**, **analyzes screenshots of the error**, **parses logs at high speed**, and **guides or executes safe diagnostic actions** — all in one live session, with human confirmation before any write operation.
+**SupportSight Live** acts as a real-time intelligent agent: it **listens to the engineer's voice**, **analyzes screenshots of the error**, **parses logs at high speed**, and **guides or executes safe diagnostic actions** — all in one live session, with human confirmation before any write operation.
 
 ---
 
@@ -108,8 +108,8 @@ Full architecture: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHI
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/armandobecerrarodriguez/gemini-live-support-copilot.git
-cd gemini-live-support-copilot
+git clone https://github.com/armandobecerraro/supportsight-live-agent.git
+cd supportsight-live-agent
 
 # 2. Set your Gemini API key
 echo "GEMINI_API_KEY=your-key-here" > backend-orchestrator/.env
@@ -173,7 +173,7 @@ See [`infra/cloudrun/`](infra/cloudrun/) for full deployment guide.
 ## Project Structure
 
 ```
-gemini-live-support-copilot/
+supportsight-live-agent/
 ├── backend-orchestrator/     # Python + FastAPI + Gemini (core orchestrator)
 │   ├── app/
 │   │   ├── agents/           # Vision, Analyst, Runbook, Action agents
