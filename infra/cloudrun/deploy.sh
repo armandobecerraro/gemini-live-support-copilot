@@ -63,6 +63,11 @@ ACTIONS_URL=$(gcloud run services describe supportsight-actions-service --region
       --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production,DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL:-redis://localhost:6379/0}"
 
 BACKEND_URL=$(gcloud run services describe supportsight-backend --region "${REGION}" --format 'value(status.url)')
+if [[ -z "${BACKEND_URL}" ]]; then
+  echo "ERROR: BACKEND_URL is empty. Backend deploy may have failed. Aborting to avoid building frontend with wrong API URL."
+  exit 1
+fi
+echo "Backend URL for frontend: ${BACKEND_URL}"
 
 # ── knowledge-ingestion ──
 echo "Ingesting runbooks into production database..."
@@ -76,19 +81,19 @@ gcloud run jobs deploy supportsight-ingest \
 
 gcloud run jobs execute supportsight-ingest --region "${REGION}" --wait
 
-    # ── frontend ──
-    echo "Building frontend..."
-    docker build -t "${IMAGE_PREFIX}/frontend:latest" ./frontend \
-      --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}"
-    docker push "${IMAGE_PREFIX}/frontend:latest"
-    gcloud run deploy supportsight-frontend \
-      --image "${IMAGE_PREFIX}/frontend:latest" \
-      --platform managed \
-      --region "${REGION}" \
-      --allow-unauthenticated \
-      --port 3000 \
-      --memory 512Mi \
-      --set-env-vars "NEXT_PUBLIC_API_URL=${BACKEND_URL},NEXT_PUBLIC_ENVIRONMENT=production"
+# ── frontend ──
+echo "Building frontend with BACKEND_URL=${BACKEND_URL}..."
+docker build -t "${IMAGE_PREFIX}/frontend:latest" ./frontend \
+  --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}"
+docker push "${IMAGE_PREFIX}/frontend:latest"
+gcloud run deploy supportsight-frontend \
+  --image "${IMAGE_PREFIX}/frontend:latest" \
+  --platform managed \
+  --region "${REGION}" \
+  --allow-unauthenticated \
+  --port 3000 \
+  --memory 512Mi \
+  --set-env-vars "NEXT_PUBLIC_API_URL=${BACKEND_URL},NEXT_PUBLIC_ENVIRONMENT=production"
 
 FRONTEND_URL=$(gcloud run services describe supportsight-frontend --region "${REGION}" --format 'value(status.url)')
 
