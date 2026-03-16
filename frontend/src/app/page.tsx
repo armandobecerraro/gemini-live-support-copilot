@@ -81,7 +81,15 @@ export default function Home() {
     setError(null);
   };
 
-  const loadExample = (type: 'db' | 'auth' | 'deploy' | 'memory' | 'voice1' | 'voice2' | 'screenshot1' | 'screenshot2') => {
+  const loadExample = (type: 'db' | 'auth' | 'deploy' | 'memory' | 'timeout' | 'disk' | 'ratelimit' | 'ssl' | 'voice1' | 'voice2' | 'screenshot1' | 'screenshot2') => {
+    // Replace previous content so each example is tried one at a time
+    setDescription('');
+    setLogs('');
+    clearTranscript();
+    clearCapture();
+    setResponse(null);
+    setError(null);
+    setStatus('idle');
     if (type === 'db') {
       setDescription('Our payment API has been returning 503 errors for the last 10 minutes. Users cannot complete checkouts.');
       setLogs('2026-03-12 10:45:01 ERROR Connection refused to database host db-primary:5432\n2026-03-12 10:45:02 ERROR Failed to acquire connection from pool (timeout=30s)\n2026-03-12 10:45:03 FATAL Max connection pool size (100) reached\n2026-03-12 10:45:04 ERROR HTTP 503 returned to client on /api/payments\n2026-03-12 10:45:05 WARN Retrying connection (attempt 3/3)\n2026-03-12 10:45:06 FATAL Database connection exhausted — all retries failed');
@@ -94,6 +102,18 @@ export default function Home() {
     } else if (type === 'memory') {
       setDescription('Backend service keeps restarting every 20 minutes. Kubernetes shows OOMKilled status.');
       setLogs('2026-03-12 09:00:00 INFO Service started OK\n2026-03-12 09:15:32 WARN Heap usage at 78% (3.1GB/4GB)\n2026-03-12 09:18:44 WARN Heap usage at 92% (3.7GB/4GB)\n2026-03-12 09:20:01 ERROR OutOfMemoryError: Java heap space\n2026-03-12 09:20:01 FATAL JVM terminated: OOM\n2026-03-12 09:20:15 INFO Service restarting (attempt 1)');
+    } else if (type === 'timeout') {
+      setDescription('API gateway is returning 504 Gateway Timeout. Downstream services are slow or not responding.');
+      setLogs('2026-03-14 11:00:00 WARN Upstream timeout after 30s (service: orders-api)\n2026-03-14 11:00:01 ERROR 504 Gateway Timeout returned to client\n2026-03-14 11:00:05 WARN Upstream timeout after 30s (service: inventory)\n2026-03-14 11:00:06 ERROR Read timed out reading from backend\n2026-03-14 11:00:10 FATAL Timeout cascade: 3/5 upstreams failed');
+    } else if (type === 'disk') {
+      setDescription('Batch jobs are failing. Logs show "No space left on device" and write errors.');
+      setLogs('2026-03-13 08:00:00 ERROR Failed to write checkpoint: No space left on device\n2026-03-13 08:00:01 FATAL ENOSPC: disk full on /data\n2026-03-13 08:00:05 ERROR Cannot create temp file for export\n2026-03-13 08:00:10 WARN Disk usage 99% on volume /data');
+    } else if (type === 'ratelimit') {
+      setDescription('Third-party API integration started returning 429. Our service is being rate-limited.');
+      setLogs('2026-03-15 09:30:00 WARN Rate limit exceeded for API key (retry-after: 60s)\n2026-03-15 09:30:01 ERROR 429 Too Many Requests from external-api.com\n2026-03-15 09:30:05 ERROR EXCEPTION in sync job: RateLimitExceeded\n2026-03-15 09:30:10 WARN Backing off 120s before next request');
+    } else if (type === 'ssl') {
+      setDescription('Service cannot connect to the legacy API. SSL handshake failures in the logs.');
+      setLogs('2026-03-14 14:00:00 ERROR SSL handshake failed: certificate has expired\n2026-03-14 14:00:01 FATAL EXCEPTION: javax.net.ssl.SSLPeerUnverifiedException\n2026-03-14 14:00:05 ERROR Failed to connect to legacy-api.internal (TLS 1.2)\n2026-03-14 14:00:10 WARN Certificate valid until 2025-12-01 — expired');
     } else if (type === 'voice1') {
       setDescription('Our payment API is returning 503 errors and users cannot complete checkouts.');
       setLogs('');
@@ -103,7 +123,7 @@ export default function Home() {
     } else if (type === 'screenshot1') {
       setDescription('I am seeing this error on the production dashboard — see attached screenshot. The UI shows a 503 Service Unavailable message.');
       setLogs('');
-    } else {
+    } else if (type === 'screenshot2') {
       setDescription('New deployment is stuck. Pods are in ImagePullBackOff — see attached screenshot of kubectl get pods output.');
       setLogs('');
     }
@@ -131,18 +151,6 @@ export default function Home() {
             </div>
 
             <div className="space-y-8">
-              <section className="space-y-3 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
-                  <Play className="w-4 h-4" /> Demo steps (for video)
-                </h3>
-                <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
-                  <li>Click one of the examples below — it fills <strong>Incident Context</strong> and <strong>Logs</strong>.</li>
-                  <li>Optional: add a screenshot via <strong>Capture Screen</strong> or <strong>Attach Snippets</strong>.</li>
-                  <li>Tap <strong>Analyze Incident</strong> and wait for the agent response.</li>
-                  <li>Review <strong>What I understood</strong>, <strong>Hypotheses</strong>, <strong>Recommendations</strong>, and any <strong>Suggested actions</strong>.</li>
-                </ol>
-              </section>
-
               <section className="space-y-3">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-emerald-400" /> How does it work?
@@ -161,7 +169,7 @@ export default function Home() {
                   </li>
                   <li className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
                     <FileText className="w-5 h-5 mx-auto mb-2 text-purple-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-tighter">Log Analysis (Rust)</span>
+                    <span className="text-[10px] font-bold uppercase tracking-tighter">Log Analysis</span>
                   </li>
                 </ul>
               </section>
@@ -171,7 +179,7 @@ export default function Home() {
                   <FileText className="w-4 h-4" /> Logs attached — how the log parser works
                 </h3>
                 <p className="text-xs text-gray-400 leading-relaxed">
-                  When you attach logs and tap <strong>Analyze Incident</strong>, the backend sends them to the <strong>log service</strong> (Rust parser). It extracts every line containing <strong>ERROR</strong>, <strong>FATAL</strong>, or <strong>EXCEPTION</strong> and infers a <strong>probable cause</strong> from keywords. That summary is then used by the agent to produce hypotheses and recommendations.
+                  When you attach logs and tap <strong>Analyze Incident</strong>, the backend analyzes them and extracts every line containing <strong>ERROR</strong>, <strong>FATAL</strong>, or <strong>EXCEPTION</strong>, then infers a <strong>probable cause</strong> from keywords. That summary is used by the agent to produce hypotheses and recommendations.
                 </p>
                 <ul className="text-[10px] text-gray-500 space-y-1 mt-2">
                   <li>• <strong className="text-cyan-400">Connection refused</strong> in logs → parser returns <em>Service connectivity failure</em> → expect DB/connectivity hypotheses.</li>
@@ -185,35 +193,63 @@ export default function Home() {
                 <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
                   <Play className="w-4 h-4 text-cyan-400" /> Ready-to-run examples (description + logs)
                 </h3>
-                <p className="text-[10px] text-white/30">Each button fills <strong>Incident Context</strong> and <strong>Logs</strong> with realistic content. Tap &quot;Analyze Incident&quot; to see the agent use the log parser output and return hypotheses + recommendations.</p>
+                <p className="text-[10px] text-white/30">Each button replaces the current form and fills <strong>Incident Context</strong> and <strong>Logs</strong> with realistic content. Tap &quot;Analyze Incident&quot; to see hypotheses and recommendations.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button 
                     onClick={() => loadExample('db')}
                     className="flex flex-col gap-2 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl hover:bg-cyan-500/10 transition-all text-left group"
                   >
                     <span className="text-xs font-bold text-cyan-400 group-hover:underline">1. Database / 503</span>
-                    <span className="text-[10px] text-gray-500">Logs contain &quot;Connection refused&quot; and pool errors → parser: <em>Service connectivity failure</em>. You should see database/connection-pool hypotheses and root cause in the response.</span>
+                    <span className="text-[10px] text-gray-500">Connection refused and pool errors → connectivity failure. Expect DB/connection-pool hypotheses.</span>
                   </button>
                   <button 
                     onClick={() => loadExample('memory')}
                     className="flex flex-col gap-2 p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl hover:bg-amber-500/10 transition-all text-left group"
                   >
                     <span className="text-xs font-bold text-amber-400 group-hover:underline">2. Backend / OOM</span>
-                    <span className="text-[10px] text-gray-500">Logs contain &quot;OutOfMemoryError&quot; and &quot;OOM&quot; → parser: <em>Memory exhaustion</em>. You should see backend/memory-leak hypotheses and recommendations (e.g. heap, GC).</span>
+                    <span className="text-[10px] text-gray-500">OutOfMemoryError and OOM → memory exhaustion. Expect heap/GC recommendations.</span>
                   </button>
                   <button 
                     onClick={() => loadExample('deploy')}
                     className="flex flex-col gap-2 p-4 bg-purple-500/5 border border-purple-500/20 rounded-2xl hover:bg-purple-500/10 transition-all text-left group"
                   >
                     <span className="text-xs font-bold text-purple-400 group-hover:underline">3. Deployment</span>
-                    <span className="text-[10px] text-gray-500">Logs contain ImagePullBackOff and 403 Forbidden → parser: <em>Application error</em> in those lines. You should see deployment/image-pull or registry-auth hypotheses.</span>
+                    <span className="text-[10px] text-gray-500">ImagePullBackOff and 403 Forbidden → deployment/registry auth hypotheses.</span>
                   </button>
                   <button 
                     onClick={() => loadExample('auth')}
                     className="flex flex-col gap-2 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl hover:bg-emerald-500/10 transition-all text-left group"
                   >
                     <span className="text-xs font-bold text-emerald-400 group-hover:underline">4. Auth / 401</span>
-                    <span className="text-[10px] text-gray-500">Logs contain JWT and 401 errors → parser: <em>Application error</em>. You should see auth/JWT/signature hypotheses and recommendations.</span>
+                    <span className="text-[10px] text-gray-500">JWT and 401 errors → auth/signing hypotheses and recommendations.</span>
+                  </button>
+                  <button 
+                    onClick={() => loadExample('timeout')}
+                    className="flex flex-col gap-2 p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl hover:bg-rose-500/10 transition-all text-left group"
+                  >
+                    <span className="text-xs font-bold text-rose-400 group-hover:underline">5. Timeout / 504</span>
+                    <span className="text-[10px] text-gray-500">Upstream timeouts and 504 → timeout cascade. Expect timeout/retry recommendations.</span>
+                  </button>
+                  <button 
+                    onClick={() => loadExample('disk')}
+                    className="flex flex-col gap-2 p-4 bg-slate-500/5 border border-slate-400/20 rounded-2xl hover:bg-slate-500/10 transition-all text-left group"
+                  >
+                    <span className="text-xs font-bold text-slate-300 group-hover:underline">6. Disk full</span>
+                    <span className="text-[10px] text-gray-500">No space left / ENOSPC → disk exhaustion. Expect storage/cleanup recommendations.</span>
+                  </button>
+                  <button 
+                    onClick={() => loadExample('ratelimit')}
+                    className="flex flex-col gap-2 p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl hover:bg-orange-500/10 transition-all text-left group"
+                  >
+                    <span className="text-xs font-bold text-orange-400 group-hover:underline">7. Rate limit / 429</span>
+                    <span className="text-[10px] text-gray-500">429 Too Many Requests and rate limit → backoff/retry and quota hypotheses.</span>
+                  </button>
+                  <button 
+                    onClick={() => loadExample('ssl')}
+                    className="flex flex-col gap-2 p-4 bg-teal-500/5 border border-teal-500/20 rounded-2xl hover:bg-teal-500/10 transition-all text-left group"
+                  >
+                    <span className="text-xs font-bold text-teal-400 group-hover:underline">8. SSL / certificate</span>
+                    <span className="text-[10px] text-gray-500">Certificate expired and SSL handshake failed → TLS/certificate renewal recommendations.</span>
                   </button>
                 </div>
               </section>
@@ -224,7 +260,7 @@ export default function Home() {
                   <h3 className="text-sm font-bold uppercase tracking-widest text-white">Gemini Reasoning</h3>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed">
-                  The agent uses <strong>RAG (Retrieval-Augmented Generation)</strong> with a vector database in <strong>Postgres</strong> populated with the project&apos;s official runbooks to provide accurate, safe solutions.
+                  The agent uses the project&apos;s official runbooks to provide accurate, safe solutions and suggested actions.
                 </p>
               </section>
             </div>
