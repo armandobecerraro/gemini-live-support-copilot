@@ -176,6 +176,7 @@ See [`infra/cloudrun/`](infra/cloudrun/) for full deployment guide.
   - Logs (Rust): `cd logs-service && cargo test`  
   - Actions: `cd actions-service && mvn test`
 - **Try production:** Open [https://supportsight-frontend-k7r3xdbakq-uc.a.run.app](https://supportsight-frontend-k7r3xdbakq-uc.a.run.app), click **Guide**, pick an example, then **Analyze Incident** to see the agent response.
+- **Run on iPhone (demo video):** Use the Flutter app on a physical iPhone or the iOS Simulator. See [Run on iPhone (demo video)](docs/flutter-ios-demo.md) for backend URL setup (local IP or production) and recording tips.
 
 ---
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'config.dart';
 import 'screens/home_screen.dart';
+import 'services/api_service.dart';
 
 void main() => runApp(const SupportSightApp());
 
@@ -13,6 +15,6 @@ class SupportSightApp extends StatelessWidget {
       colorScheme: const ColorScheme.dark(primary: Color(0xFF01696F), secondary: Color(0xFF4F98A3)),
       useMaterial3: true,
     ),
-    home: const HomeScreen(),
+    home: HomeScreen(api: ApiService(baseUrl: kBackendBaseUrl)),
   );
 }
