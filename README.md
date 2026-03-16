@@ -247,7 +247,7 @@ MIT — See [LICENSE](LICENSE)
 
 ## Devpost
 
-🏆 **Submitted to the [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/)**
+🏆 **Submitted to the [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/) **— #GeminiLiveAgentChallenge**
 
 - **Built with:** Gemini 2.0 Flash Live, Google GenAI SDK, Google Cloud Run
 - **Languages:** Python, Rust, Java, TypeScript, Dart
