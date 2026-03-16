@@ -40,8 +40,12 @@ pubspec.lock
 *.swp
 .DS_Store
 
-# Docker
-.docker/
+# Coverage artifacts
+.coverage
+coverage/
+**/coverage/
+htmlcov/
+*.lcov
 
 # Secrets — NEVER commit
 *.pem

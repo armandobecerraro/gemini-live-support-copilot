@@ -14,13 +14,44 @@ void main() {
 
     setUp(() {
       mockHttpClient = MockHttpClient();
-      apiService = ApiService(baseUrl: 'http://localhost:8080');
+      apiService = ApiService(baseUrl: 'http://localhost:8080', client: mockHttpClient);
+      registerFallbackValue(Uri.parse('http://localhost:8080'));
     });
 
     test('analyzeIssue returns AgentResponse on success', () async {
-      // Mock implementation would require injecting http.Client into ApiService
-      // For now, we'll just verify the service structure
-      expect(apiService.baseUrl, 'http://localhost:8080');
+      final mockResponse = {
+        'session_id': 's1',
+        'correlation_id': 'c1',
+        'what_i_understood': 'ok',
+        'recommendations': [],
+        'hypotheses': [],
+        'confidence': 1.0,
+        'needs_more_info': false,
+        'suggested_actions': []
+      };
+      
+      when(() => mockHttpClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')))
+          .thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+
+      final result = await apiService.analyzeIssue(IssueRequest(description: 'test'));
+      expect(result.sessionId, 's1');
+      expect(result.confidence, 1.0);
+    });
+
+    test('analyzeIssue throws on error', () async {
+      when(() => mockHttpClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')))
+          .thenAnswer((_) async => http.Response('Error', 500));
+
+      expect(() => apiService.analyzeIssue(IssueRequest(description: 'test')), throwsException);
+    });
+
+    test('confirmAction returns map on success', () async {
+      final mockResponse = {'status': 'approved'};
+      when(() => mockHttpClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')))
+          .thenAnswer((_) async => http.Response(jsonEncode(mockResponse), 200));
+
+      final result = await apiService.confirmAction('s1', 'a1', true);
+      expect(result['status'], 'approved');
     });
   });
 }

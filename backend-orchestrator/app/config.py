@@ -3,10 +3,18 @@ Application configuration — 12-Factor App pattern.
 All sensitive values come from environment variables.
 """
 from functools import lru_cache
+from typing import Union
+from pydantic import field_validator, ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
     # ── App ──
     APP_NAME: str = "SupportSight Live"
     APP_VERSION: str = "1.0.0"
@@ -34,15 +42,20 @@ class Settings(BaseSettings):
     # ── Security ──
     SECRET_KEY: str = "change-me-in-production"
     API_KEY_HEADER: str = "X-API-Key"
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+    ALLOWED_ORIGINS: Union[list[str], str] = ["http://localhost:3000", "http://localhost:8080"]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
 
     # ── Session ──
     SESSION_TTL_SECONDS: int = 3600
     MAX_SESSION_HISTORY: int = 50
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
 
 
 @lru_cache

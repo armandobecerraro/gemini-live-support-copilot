@@ -64,13 +64,12 @@ pub fn parse_logs(raw: &str) -> LogAnalysisResult {
         let mut level = None;
 
         // Extreme speed keyword matching using Aho-Corasick
-        for mat in ac.find_iter(line) {
+        if let Some(mat) = ac.find_iter(line).next() {
             match mat.pattern().as_u32() {
                 0..=4 => level = Some("ERROR"),
                 5..=6 => level = Some("WARN"),
                 _ => {}
             }
-            break; // First match defines the level
         }
 
         // Simple anomaly detection (e.g. lines that are suspiciously long or have many special chars)

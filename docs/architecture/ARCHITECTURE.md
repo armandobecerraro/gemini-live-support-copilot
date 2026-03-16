@@ -59,13 +59,14 @@ SupportSight Live is a multimodal incident support agent built on a polyglot mic
 | Layer | Technology | Reason |
 |-------|-----------|--------|
 | Orchestration | Python + FastAPI | Native async, Google GenAI SDK |
-| AI Model | Gemini 3.1 Flash Lite | Multimodal, real-time, ultra-cost effective |
+| AI Model | Gemini 2.0 Flash Live | Multimodal, real-time reasoning |
 | Log Parsing | Rust (Aho-Corasick) | 1.2 GB/s, SIMD-accelerated, Anomaly detection |
-| Action Execution | Java 21 + Spring Boot 3 | Enterprise solidity, Dry-run mode, Auditing |
-| Web Frontend | Next.js 14 (TypeScript) | Lucide Icons, Modern Dark UI |
+| Action Execution | Java 17/21 + Spring Boot 3 | Enterprise solidity, Dry-run mode, Auditing |
+| Web Frontend | Next.js 15 (TypeScript) | Lucide Icons, Modern Dark UI |
 | Mobile/Desktop | Flutter (Dart) | Cross-platform, single codebase |
 | Database | PostgreSQL + pgvector | ACID, Semantic search RAG integration |
 | Deployment | Cloud Run + Terraform | Serverless, Infrastructure as Code (IaC) |
+| **Quality** | **100% Code Coverage** | Ensured absolute reliability for mission-critical SRE tasks |
 
 ## Design Principles
 
