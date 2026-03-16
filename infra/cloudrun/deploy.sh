@@ -60,7 +60,7 @@ ACTIONS_URL=$(gcloud run services describe supportsight-actions-service --region
       --memory 1Gi \
       --cpu 2 \
       --set-secrets "GEMINI_API_KEY=gemini-api-key:latest" \
-      --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production,DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL:-redis://localhost:6379/0}"
+      --set-env-vars "LOGS_SERVICE_URL=${LOGS_URL},ACTIONS_SERVICE_URL=${ACTIONS_URL},ENVIRONMENT=production,DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL:-redis://localhost:6379/0},ALLOWED_ORIGINS=*"
 
 BACKEND_URL=$(gcloud run services describe supportsight-backend --region "${REGION}" --format 'value(status.url)')
 if [[ -z "${BACKEND_URL}" ]]; then
@@ -84,7 +84,8 @@ gcloud run jobs execute supportsight-ingest --region "${REGION}" --wait
 # ── frontend ──
 echo "Building frontend with BACKEND_URL=${BACKEND_URL}..."
 docker build -t "${IMAGE_PREFIX}/frontend:latest" ./frontend \
-  --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}"
+  --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}" \
+  --build-arg NEXT_PUBLIC_BACKEND_API_KEY="change-me-in-production"
 docker push "${IMAGE_PREFIX}/frontend:latest"
 gcloud run deploy supportsight-frontend \
   --image "${IMAGE_PREFIX}/frontend:latest" \

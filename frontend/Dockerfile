@@ -10,7 +10,9 @@ RUN npm ci
 # Stage 2: Build the application
 FROM base AS builder
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_BACKEND_API_KEY
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+ENV NEXT_PUBLIC_BACKEND_API_KEY=${NEXT_PUBLIC_BACKEND_API_KEY:-""}
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
