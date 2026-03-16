@@ -1,10 +1,9 @@
 """Test session service."""
 import os
 import pytest
+import json
+from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime
-
-os.environ["GEMINI_API_KEY"] = "test-key"
-os.environ["DEBUG"] = "true"
 
 from app.services.session_service import SessionService
 from app.domain.models import SessionState, Hypothesis
