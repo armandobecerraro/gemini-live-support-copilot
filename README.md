@@ -167,6 +167,18 @@ See [`infra/cloudrun/`](infra/cloudrun/) for full deployment guide.
 
 ---
 
+## Testing
+
+- **Run the app locally:** Follow [Quick Start](#quick-start) (clone, set `GEMINI_API_KEY`, `docker-compose -f docker-compose.local.yml up --build`, then open `http://localhost:3000`). Use the in-app **Guide** for ready-to-run incident examples.
+- **Run automated tests:**  
+  - Backend: `cd backend-orchestrator && pip install -r requirements.txt -r requirements-dev.txt && GEMINI_API_KEY=test-key DEBUG=true pytest tests/ -v`  
+  - Frontend: `cd frontend && npm install --legacy-peer-deps && npm test`  
+  - Logs (Rust): `cd logs-service && cargo test`  
+  - Actions: `cd actions-service && mvn test`
+- **Try production:** Open [https://supportsight-frontend-k7r3xdbakq-uc.a.run.app](https://supportsight-frontend-k7r3xdbakq-uc.a.run.app), click **Guide**, pick an example, then **Analyze Incident** to see the agent response.
+
+---
+
 ## Project Structure
 
 ```
