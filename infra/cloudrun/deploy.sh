@@ -5,7 +5,8 @@ set -e
 
 PROJECT_ID="${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
 REGION="${GCP_REGION:-us-central1}"
-IMAGE_PREFIX="${REGION}-docker.pkg.dev/${PROJECT_ID}/supportsight"
+# Usar el nuevo nombre de repositorio en el prefijo de imagen
+IMAGE_PREFIX="${REGION}-docker.pkg.dev/${PROJECT_ID}/supportsight-live-agent"
 
 # Authenticate Docker to Artifact Registry
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
