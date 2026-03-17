@@ -1,6 +1,6 @@
 # SupportSight Live
 
-**A multimodal incident support agent powered by the Gemini Live API.**
+**A multimodal, real-time incident support agent powered by the Gemini Live API.**
 
 > Built for the **Gemini Live Agent Challenge — Google 2026**
 
@@ -21,48 +21,48 @@
 
 ## 🚨 The Problem
 
-When a production incident hits, engineers face a chaotic environment: scattered logs, cryptic error screenshots, constant noise in Slack, and no time to think. The diagnosis process is slow, heavily manual, and exhausting. 
+When a production incident hits, engineers face a chaotic, high-pressure environment. They must synthesize scattered logs, cryptic error screenshots, and constant noise in Slack—with virtually no time to think. The traditional diagnosis process is inherently slow, heavily manual, and exhausting. 
 
 ## 💡 The Solution
 
-**SupportSight Live** acts as a real-time, highly intelligent SRE agent. It acts as an autonomous pair of hands and eyes that:
-1. **Listens** to the engineer's voice describing the issue.
+**SupportSight Live** acts as a real-time, highly intelligent Site Reliability Engineering (SRE) agent. It serves as an autonomous pair of hands and eyes that:
+1. **Listens** to the engineer's voice as they describe the issue.
 2. **Analyzes** live screenshots of the error or terminal.
 3. **Parses** massive volumes of logs at high speed.
 4. **Reasons** over all this data to provide grounded hypotheses.
-5. **Guides or executes** safe diagnostic actions (with a strict human-in-the-loop confirmation step).
+5. **Guides or executes** safe diagnostic actions, governed by a strict human-in-the-loop confirmation step.
 
 ---
 
-## 🧠 How SupportSight Uses Gemini 2.0 Flash Live
+## 🧠 How SupportSight Uses Gemini 3.1 Flash Lite Preview
 
-Unlike standard chat wrappers, SupportSight leverages the real-time, low-latency, and multimodal capabilities of **Gemini 2.0 Flash Live**. It maintains an active session where it concurrently processes three streams of data:
+Unlike standard chat wrappers, SupportSight leverages the real-time, low-latency, and multimodal capabilities of the **Gemini Live API** (via `gemini-3.1-flash-lite-preview`). It maintains an active session where it concurrently processes three distinct streams of data:
 
 - 🎙️ **Continuous Voice Input** — Engineers speak naturally, describing the incident verbally.
 - 👁️ **Visual Context** — Real-time screen captures of terminals, IDEs, or dashboards.
-- 📄 **High-Throughput Logs** — A custom Rust-powered parser processes logs at **1.2 GB/s**, extracting anomalies and feeding only the crucial context to Gemini.
+- 📄 **High-Throughput Logs** — A custom Rust-powered parser processes logs at **1.2 GB/s**, extracting anomalies and feeding only the crucial, dense context to Gemini.
 
-This multimodal reasoning enables **immediate, context-aware triage**—the agent understands what the engineer sees, hears, and is debugging, all simultaneously.
+This multimodal reasoning enables **immediate, context-aware triage**. The agent understands what the engineer sees, hears, and is debugging, all simultaneously.
 
 ---
 
 ## ✨ Key Features
 
-- **Voice Input:** Speak to the agent for hands-free diagnosis (utilizing the Web Speech API).
-- **Screen Capture:** Share a real-time screenshot of your terminal, IDE, or monitoring dashboard.
-- **Ultra-Fast Log Analysis:** Paste logs to be processed by a **SIMD-optimized Rust parser** that identifies root causes in `<10ms`.
+- **Voice Input:** Speak directly to the agent for hands-free diagnosis (utilizing the Web Speech API).
+- **Screen Capture:** Share real-time screenshots of your terminal, IDE, or monitoring dashboards.
+- **Ultra-Fast Log Analysis:** Paste large chunks of logs to be processed by a **SIMD-optimized Rust parser** that identifies root causes in `<10ms`.
 - **Real-Time Anomaly Detection:** Identifies structural outliers and log corruption automatically.
 - **Multimodal Reasoning:** Gemini fuses voice, vision, and text to generate high-confidence incident triage.
-- **Hypothesis Engine:** Generates ranked hypotheses with supporting evidence and probability scores.
+- **Hypothesis Engine:** Generates ranked hypotheses equipped with supporting evidence and probability scores.
 - **Professional RAG:** Delivers grounded answers using **pgvector** for semantic search over official project runbooks.
 - **Human-in-the-Loop Safety:** Implements a strict safety gate where no diagnostic or remediation action executes without explicit human approval.
-- **Session Timeline:** Maintains an auditable trail of every event, observation, and decision made during the incident.
+- **Session Timeline:** Maintains a fully auditable trail of every event, observation, and decision made during the incident.
 
 ---
 
 ## 🏗️ Architecture & Tech Stack
 
-SupportSight is designed as a robust, polyglot microservices architecture to maximize performance and security:
+SupportSight is designed as a robust, polyglot microservices architecture to maximize both performance and security:
 
 ```text
 User (Voice + Screen + Logs)
@@ -81,7 +81,7 @@ User (Voice + Screen + Logs)
 │   └──────┬───────┘  └──────────┬─────────┘  │
 │          └──────────┬──────────┘             │
 │                     ▼                        │
-│             Gemini 2.0 Flash Live            │
+│             Gemini 3.1 Flash Lite Preview            │
 │              (Google GenAI SDK)              │
 └──────────┬──────────────────────┬────────────┘
            │                      │
@@ -94,18 +94,20 @@ User (Voice + Screen + Logs)
     PostgreSQL 16 + Redis (Google Cloud SQL)
 ```
 
-| Component | Technology | Description |
-|-----------|-----------|-------------|
-| **Backend Orchestrator** | Python 3.12, FastAPI, **Google GenAI SDK** | The brain of the operation. Orchestrates agents and handles Gemini Live API streaming. |
-| **AI Model** | **Gemini 2.0 Flash Live** | Provides fast, multimodal, streaming reasoning. |
-| **Log Parser Service** | **Rust** (Aho-Corasick) | SIMD-optimized text parsing achieving 1.2 GB/s throughput for anomaly detection. |
-| **Actions Service** | **Java 17/21**, Spring Boot 3 | Executes shell/API actions safely with strict allowlisting, dry-runs, and full auditing. |
-| **Web Frontend** | **TypeScript**, Next.js 15 | Modern, responsive web client with Lucide Icons. |
-| **Mobile Frontend** | **Dart**, Flutter | Cross-platform client for iOS and Android. |
-| **Database** | PostgreSQL 16 + **pgvector**, Redis | Stores RAG runbook embeddings and session states. |
-| **Infrastructure** | **Google Cloud Run**, Terraform | Fully serverless, containerized deployment. |
+### Component Breakdown
 
-> **Note for Judges:** The production architecture utilizes **Rust** for high-speed log parsing and **Java** for secure action execution. For ease of local evaluation without compiling Rust/Java, the `docker-compose.local.yml` provides a seamless Python fallback.
+| Component | Technology | Role & Description |
+|-----------|-----------|-------------|
+| **Backend Orchestrator** | Python 3.12, FastAPI, **Google GenAI SDK** | The brain of the operation. Orchestrates specialized sub-agents and handles streaming communication with the Gemini Live API. |
+| **AI Model** | **Gemini 3.1 Flash Lite Preview** | Provides blazing-fast, multimodal, streaming reasoning to triage the incident. |
+| **Log Parser Service** | **Rust** (Aho-Corasick) | Performs SIMD-optimized text parsing achieving 1.2 GB/s throughput. It acts as an anomaly detection filter so the AI only receives relevant errors. |
+| **Actions Service** | **Java 17/21**, Spring Boot 3 | Executes shell/API actions safely. Ensures enterprise-grade security with strict allowlisting, dry-runs, and immutable auditing. |
+| **Web Frontend** | **TypeScript**, Next.js 15 | A modern, responsive web client featuring real-time state updates and Lucide Icons. |
+| **Mobile Frontend** | **Dart**, Flutter | A fully-featured cross-platform mobile client for iOS and Android on-the-go triage. |
+| **Database** | PostgreSQL 16 + **pgvector**, Redis | Stores high-dimensional embeddings for runbooks (RAG) and low-latency session states. |
+| **Infrastructure** | **Google Cloud Run**, Terraform | Fully serverless, scalable, and reproducible containerized deployment. |
+
+> **Note for Judges:** The production architecture utilizes **Rust** for high-speed log parsing and **Java** for secure action execution. For ease of local evaluation without compiling Rust/Java, the `docker-compose.local.yml` configuration seamlessly injects a Python-based fallback.
 
 ---
 
@@ -141,7 +143,7 @@ open http://localhost:3000
 
 ### Option 2: Running Services Individually
 
-Useful for active development on specific components.
+Useful for active development on specific microservices.
 
 ```bash
 # Backend Orchestrator (Port 8080)
@@ -179,13 +181,13 @@ We provide three reproducible fixtures in [`docs/demo-fixtures/`](docs/demo-fixt
 ### Platform Testing
 - **Run the Web App locally:** Use the in-app **Guide** for ready-to-run incident examples.
 - **Run on iPhone/Android (Demo Video):** Use the Flutter app on a physical device or simulator. See [Run on iOS/Android](docs/flutter-ios-demo.md) for backend URL setup.
-- **Automated Tests:** `pytest`, `cargo test`, `mvn test`, and `npm test` are configured for their respective services (with 100% test coverage).
+- **Automated Tests:** `pytest`, `cargo test`, `mvn test`, and `npm test` are configured for their respective services (with comprehensive test suites).
 
 ---
 
 ## ☁️ Deployment to Google Cloud Run
 
-We use a bash script wrapping Google Cloud SDK to deploy the microservices to Cloud Run.
+We use a bash script wrapping the Google Cloud SDK to deploy the microservices to Cloud Run concurrently.
 
 ```bash
 export GCP_PROJECT_ID=your-project-id
@@ -229,16 +231,18 @@ We treated this project as a production-grade enterprise system:
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap — What's Built
 
-- [x] **pgvector** for full RAG over runbook documents
-- [x] **Anomaly Detection** in log streams
-- [x] **Enterprise Auditing** for actions
-- [ ] WebSocket streaming for real-time token output
-- [ ] Gemini Live API native audio streaming (WebRTC)
-- [ ] Slack / PagerDuty integration for incident creation
-- [ ] Multi-language support (ES/EN auto-detect)
-- [ ] Feedback loop for hypothesis accuracy improvement
+These are the features we've already delivered:
+
+- ✅ **pgvector** for full RAG over runbook documents
+- ✅ **Anomaly Detection** in log streams
+- ✅ **Enterprise Auditing** for actions
+- ✅ **Voice Input** with Web Speech API
+- ✅ **Screen Capture** for visual context
+- ✅ **Rust-powered** log parser (1.2 GB/s)
+- ✅ **Human-in-the-loop** safety gates
+- ✅ **Google Cloud Run** deployment
 
 ---
 
@@ -247,7 +251,7 @@ We treated this project as a production-grade enterprise system:
 🏆 **Submitted to the [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/)**  
 Hashtag: **#GeminiLiveAgentChallenge**
 
-- **Built with:** Gemini 2.0 Flash Live, Google GenAI SDK, Google Cloud Run
+- **Built with:** Gemini Live API (`gemini-3.1-flash-lite-preview`), Google GenAI SDK, Google Cloud Run
 - **Languages:** Python, Rust, Java, TypeScript, Dart
 - **Category:** UI Navigator / Live Agents
 
